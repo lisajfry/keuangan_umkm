@@ -43,7 +43,7 @@ export default function TransactionForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isBalanced) {
-      setMessage("⚠️ Transaksi tidak seimbang (Debit ≠ Kredit)");
+      setMessage("⚠ Transaksi tidak seimbang (Debit ≠ Kredit)");
       return;
     }
 
@@ -175,7 +175,7 @@ export default function TransactionForm() {
           <p>Total Debit: <b>{totalDebit}</b></p>
           <p>Total Kredit: <b>{totalCredit}</b></p>
           {!isBalanced && (
-            <p className="text-red-600">⚠️ Debit dan Kredit belum balance</p>
+            <p className="text-red-600">⚠ Debit dan Kredit belum balance</p>
           )}
         </div>
       </div>

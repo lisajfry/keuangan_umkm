@@ -1,134 +1,188 @@
+// src/pages/TransactionList.jsx
 import React, { useEffect, useState } from "react";
-import api from "../api/api"; // sesuaikan path api.js
+import api from "../api/api";
+import DashboardLayout from "../layouts/DashboardLayout";
 
-const TransactionList = ({ currentUser }) => {
+export default function TransactionList() {
   const [transactions, setTransactions] = useState([]);
   const [umkms, setUmkms] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [filters, setFilters] = useState({
     umkm_id: "",
-    start_date: "",
-    end_date: "",
-    page: 1,
-    per_page: 10,
+    month: "",
+    year: "",
   });
 
+  // 🔹 Ambil semua transaksi
   const fetchTransactions = async () => {
-  try {
-    let url = "/umkm/" + (filters.umkm_id || "all") + "/transactions";
-    const res = await api.get(url, { params: filters });
-    setTransactions(res.data.data || res.data);
-  } catch (error) {
-    console.error(error);
-    alert("Gagal mengambil data transaksi dari backend UMKM");
-  }
-};
-
-
-  const fetchUmkms = async () => {
-    if (currentUser.role !== "admin") return;
+    setLoading(true);
     try {
-      const res = await api.get("/umkms"); // endpoint daftar UMKM
+      const res = await api.get("/transactions", { params: filters });
+      setTransactions(res.data);
+    } catch (err) {
+      console.error("Gagal memuat transaksi:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔹 Ambil daftar UMKM
+  const fetchUmkms = async () => {
+    try {
+      const res = await api.get("/umkms");
       setUmkms(res.data);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error("Gagal memuat UMKM:", err);
     }
   };
 
   useEffect(() => {
-    fetchTransactions();
     fetchUmkms();
-  }, [filters]);
+    fetchTransactions();
+  }, []);
 
   const handleFilterChange = (e) => {
-    setFilters({ ...filters, [e.target.name]: e.target.value, page: 1 });
+    setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
-  
+  const handleFilterSubmit = (e) => {
+    e.preventDefault();
+    fetchTransactions();
+  };
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Daftar Transaksi</h2>
+    <DashboardLayout>
+      <div className="p-6">
+        <h2 className="text-2xl font-bold text-indigo-700 mb-6">
+          📋 Daftar Transaksi Semua UMKM
+        </h2>
 
-      {/* Filter */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        {currentUser.role === "admin" && (
-          <select
-            name="umkm_id"
-            value={filters.umkm_id}
-            onChange={handleFilterChange}
-            className="border px-3 py-2 rounded"
-          >
-            <option value="">-- Semua UMKM --</option>
-            {umkms.map((umkm) => (
-              <option key={umkm.id} value={umkm.id}>
-                {umkm.name}
-              </option>
-            ))}
-          </select>
-        )}
-
-        <input
-          type="date"
-          name="start_date"
-          value={filters.start_date}
-          onChange={handleFilterChange}
-          className="border px-3 py-2 rounded"
-        />
-        <input
-          type="date"
-          name="end_date"
-          value={filters.end_date}
-          onChange={handleFilterChange}
-          className="border px-3 py-2 rounded"
-        />
-
-        <button
-          onClick={fetchTransactions}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        {/* 🔹 Filter Form */}
+        <form
+          onSubmit={handleFilterSubmit}
+          className="flex flex-wrap gap-4 items-end mb-8 bg-white shadow-md p-5 rounded-xl border border-indigo-100"
         >
-          Filter
-        </button>
-      </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Pilih UMKM:
+            </label>
+            <select
+              name="umkm_id"
+              value={filters.umkm_id}
+              onChange={handleFilterChange}
+              className="border border-gray-300 rounded-lg px-3 py-2 w-48 focus:ring-2 focus:ring-indigo-300 focus:outline-none"
+            >
+              <option value="">Semua UMKM</option>
+              {umkms.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.nama_umkm}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      {/* Tabel transaksi */}
-      <table className="w-full border-collapse border">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border px-3 py-2">ID</th>
-            <th className="border px-3 py-2">Tanggal</th>
-            <th className="border px-3 py-2">Deskripsi</th>
-            <th className="border px-3 py-2">Kategori</th>
-            <th className="border px-3 py-2">Total Debit</th>
-            <th className="border px-3 py-2">Total Kredit</th>
-            <th className="border px-3 py-2">UMKM</th>
-          </tr>
-        </thead>
-        <tbody>
-          {transactions.length === 0 ? (
-            <tr>
-              <td colSpan="7" className="text-center py-4">
-                Tidak ada transaksi
-              </td>
-            </tr>
-          ) : (
-            transactions.map((tx) => (
-              <tr key={tx.id}>
-                <td className="border px-3 py-2">{tx.id}</td>
-                <td className="border px-3 py-2">{tx.date}</td>
-                <td className="border px-3 py-2">{tx.description}</td>
-                <td className="border px-3 py-2">{tx.category}</td>
-                <td className="border px-3 py-2">{tx.total_debit}</td>
-                <td className="border px-3 py-2">{tx.total_credit}</td>
-                <td className="border px-3 py-2">{tx.created_by}</td>
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Bulan:
+            </label>
+            <select
+              name="month"
+              value={filters.month}
+              onChange={handleFilterChange}
+              className="border border-gray-300 rounded-lg px-3 py-2 w-36 focus:ring-2 focus:ring-indigo-300 focus:outline-none"
+            >
+              <option value="">Semua</option>
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {new Date(0, i).toLocaleString("id-ID", { month: "long" })}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Tahun:
+            </label>
+            <input
+              type="number"
+              name="year"
+              placeholder="2025"
+              value={filters.year}
+              onChange={handleFilterChange}
+              className="border border-gray-300 rounded-lg px-3 py-2 w-28 focus:ring-2 focus:ring-indigo-300 focus:outline-none"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg shadow transition-all duration-200"
+          >
+            Terapkan Filter
+          </button>
+        </form>
+
+        {/* 🔹 Tabel Transaksi */}
+        <div className="overflow-x-auto bg-white rounded-xl shadow-lg border border-indigo-100">
+          <table className="min-w-full text-sm text-gray-700">
+            <thead className="bg-indigo-600 text-white">
+              <tr>
+                <th className="p-3 text-left">Tanggal</th>
+                <th className="p-3 text-left">Deskripsi</th>
+                <th className="p-3 text-left">Kategori</th>
+                <th className="p-3 text-left">UMKM</th>
+                <th className="p-3 text-right">Total Debit</th>
+                <th className="p-3 text-right">Total Kredit</th>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="p-6 text-center text-gray-500">
+                    Memuat data...
+                  </td>
+                </tr>
+              ) : transactions.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="p-6 text-center text-gray-500">
+                    Tidak ada transaksi ditemukan
+                  </td>
+                </tr>
+              ) : (
+                transactions.map((trx) => {
+                  const totalDebit = trx.details?.reduce(
+                    (sum, d) => sum + (parseFloat(d.debit) || 0),
+                    0
+                  );
+                  const totalCredit = trx.details?.reduce(
+                    (sum, d) => sum + (parseFloat(d.credit) || 0),
+                    0
+                  );
 
-      
-    </div>
+                  return (
+                    <tr
+                      key={trx.id}
+                      className="border-b hover:bg-indigo-50 transition-colors"
+                    >
+                      <td className="p-3">{trx.date}</td>
+                      <td className="p-3">{trx.description}</td>
+                      <td className="p-3">{trx.category}</td>
+                      <td className="p-3">{trx.nama_umkm}</td>
+                      <td className="p-3 text-right text-green-600 font-semibold">
+                        Rp {totalDebit.toLocaleString("id-ID")}
+                      </td>
+                      <td className="p-3 text-right text-red-600 font-semibold">
+                        Rp {totalCredit.toLocaleString("id-ID")}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </DashboardLayout>
   );
-};
-
-export default TransactionList;
+}

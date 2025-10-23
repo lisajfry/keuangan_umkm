@@ -1,10 +1,10 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api", // ganti sesuai URL backend kamu
+  baseURL: "http://127.0.0.1:8000/api", // sesuaikan URL backend kamu
 });
 
-// Tambahkan interceptor untuk menambahkan token otomatis
+// 🔒 Tambahkan token otomatis dari localStorage
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {

@@ -5,6 +5,7 @@ import UmkmAdd from "./pages/UmkmAdd";
 import Login from "./pages/Login";
 import EditUmkm from "./pages/EditUmkm";
 import TransactionList from "./pages/TransactionList"; // import halaman transaksi
+import AdminSummary from "./pages/AdminSummary";
 
 function App() {
   const currentUser = JSON.parse(localStorage.getItem("user")); // ambil user login
@@ -22,6 +23,10 @@ function App() {
         <Route
           path="/transactions"
           element={<TransactionList currentUser={currentUser} />}
+        />
+        <Route
+          path="/laporan"
+          element={<AdminSummary currentUser={currentUser} />}
         />
       </Routes>
     </BrowserRouter>

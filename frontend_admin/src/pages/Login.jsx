@@ -73,7 +73,7 @@ export default function Login() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="relative"
+            className="relative" 
           >
             <Mail className="absolute left-3 top-2.5 text-blue-400 w-5 h-5" />
             <input
@@ -117,7 +117,7 @@ export default function Login() {
                   ? "bg-blue-300 cursor-not-allowed"
                   : "bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-200"
               }`}
-          >
+           >
             {loading ? (
               <div className="flex justify-center items-center gap-2">
                 <svg

@@ -78,7 +78,7 @@ export default function UmkmList() {
     <DashboardLayout>
       <div className="p-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-          <h1 className="text-3xl font-bold text-indigo-700 tracking-tight">
+          <h1 className="text-2xl font-bold text-indigo-700 mb-6">
             📋 Daftar UMKM
           </h1>
           <input

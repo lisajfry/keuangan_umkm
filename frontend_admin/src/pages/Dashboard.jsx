@@ -1,43 +1,92 @@
 // src/pages/Dashboard.jsx
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import DashboardLayout from "../layouts/DashboardLayout";
 
 export default function Dashboard() {
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState({});
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://127.0.0.1:8000/api/admin/report/summary-all", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setTotal(res.data.total_all || {});
+      } catch (err) {
+        console.error("Gagal ambil data total:", err);
+        setError("Gagal memuat data total");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSummary();
+  }, []);
+
   return (
     <DashboardLayout>
-      <h2 className="text-3xl font-bold text-blue-700 mb-6">Dashboard Admin</h2>
+      <div className="p-8">
+        <h1 className="text-3xl font-bold text-blue-700 mb-8">Dashboard Admin</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white shadow-lg rounded-xl p-6 hover:shadow-xl transition">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">
-            Total Transaksi
-          </h3>
-          <p className="text-3xl font-bold text-blue-600">Rp 120.000.000</p>
-        </div>
+        {loading ? (
+          <p className="text-gray-500 text-lg">Memuat data...</p>
+        ) : error ? (
+          <div className="bg-red-100 text-red-700 p-4 rounded-lg shadow mb-4">
+            ⚠️ {error}
+          </div>
+        ) : (
+          <>
+            {/* 🔹 Ringkasan total (6 card) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition">
+                <p className="text-gray-500 text-sm">Total Pendapatan</p>
+                <h3 className="text-2xl font-semibold text-green-600">
+                  Rp {Number(total.revenue || 0).toLocaleString("id-ID")}
+                </h3>
+              </div>
 
-        <div className="bg-white shadow-lg rounded-xl p-6 hover:shadow-xl transition">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">
-            Pengeluaran Bulan Ini
-          </h3>
-          <p className="text-3xl font-bold text-red-500">Rp 42.500.000</p>
-        </div>
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition">
+                <p className="text-gray-500 text-sm">Total Beban</p>
+                <h3 className="text-2xl font-semibold text-red-500">
+                  Rp {Number(total.expense || 0).toLocaleString("id-ID")}
+                </h3>
+              </div>
 
-        <div className="bg-white shadow-lg rounded-xl p-6 hover:shadow-xl transition">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">
-            Sisa Anggaran
-          </h3>
-          <p className="text-3xl font-bold text-green-600">Rp 77.500.000</p>
-        </div>
-      </div>
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition">
+                <p className="text-gray-500 text-sm">Laba Bersih</p>
+                <h3 className="text-2xl font-semibold text-blue-600">
+                  Rp {Number(total.net_income || 0).toLocaleString("id-ID")}
+                </h3>
+              </div>
 
-      <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
-        <h3 className="text-xl font-semibold text-blue-700 mb-4">
-          Aktivitas Terbaru
-        </h3>
-        <ul className="space-y-3 text-gray-700">
-          <li>• Pembayaran vendor “ABC Corp” sebesar Rp 12.000.000</li>
-          <li>• Pengajuan dana operasional diterima</li>
-          <li>• Update laporan keuangan mingguan</li>
-        </ul>
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition">
+                <p className="text-gray-500 text-sm">Total Aset</p>
+                <h3 className="text-2xl font-semibold text-indigo-600">
+                  Rp {Number(total.assets || 0).toLocaleString("id-ID")}
+                </h3>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition">
+                <p className="text-gray-500 text-sm">Total Kewajiban</p>
+                <h3 className="text-2xl font-semibold text-yellow-600">
+                  Rp {Number(total.liabilities || 0).toLocaleString("id-ID")}
+                </h3>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition">
+                <p className="text-gray-500 text-sm">Total Ekuitas</p>
+                <h3 className="text-2xl font-semibold text-purple-600">
+                  Rp {Number(total.equity || 0).toLocaleString("id-ID")}
+                </h3>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </DashboardLayout>
   );

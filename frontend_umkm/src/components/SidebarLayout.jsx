@@ -1,10 +1,19 @@
-import React from "react";
+// ===== SidebarLayout.jsx =====
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Menu } from "lucide-react";
 import umkmApi from "../api/umkmApi";
 
 export default function SidebarLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [namaUmkm, setNamaUmkm] = useState("UMKM");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const storedName = localStorage.getItem("nama_umkm");
+    if (storedName) setNamaUmkm(storedName);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -13,6 +22,7 @@ export default function SidebarLayout({ children }) {
       console.error("Logout gagal:", e);
     }
     localStorage.removeItem("umkm_token");
+    localStorage.removeItem("nama_umkm");
     navigate("/login");
   };
 
@@ -23,21 +33,56 @@ export default function SidebarLayout({ children }) {
   ];
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex min-h-screen bg-gray-50 overflow-hidden">
+      {/* SIDEBAR OVERLAY (mobile) */}
+      <div
+        className={`fixed inset-0 bg-black/40 z-30 transition-opacity ${
+          sidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        }`}
+        onClick={() => setSidebarOpen(false)}
+      ></div>
+
       {/* SIDEBAR */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col justify-between fixed left-0 top-0 bottom-0">
+      <aside
+        className={`fixed z-40 top-0 left-0 h-full w-64 bg-white border-r border-gray-200 flex flex-col justify-between transform transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
+      >
         <div>
-          <div className="px-6 py-5 border-b border-gray-100">
-            <h1 className="text-xl font-bold text-gray-800 tracking-tight">
-              UMKM Finance
+          {/* Header Logo Section */}
+          <div className="px-6 py-8 border-b border-gray-100 flex flex-col items-center space-y-4">
+            <div className="flex items-center justify-center space-x-5">
+              {/* Logo kiri */}
+              <div className="w-20 h-20 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/logo1.png"
+                  alt="Logo kiri"
+                  className="w-full h-full object-contain scale-125"
+                />
+              </div>
+
+              {/* Logo kanan */}
+              <div className="w-20 h-20 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/logo2.png"
+                  alt="Logo kanan"
+                  className="w-full h-full object-contain scale-125"
+                />
+              </div>
+            </div>
+
+            <h1 className="text-xl font-bold text-gray-800 tracking-tight text-center">
+              {namaUmkm} <span className="text-blue-600">UMKM</span>
             </h1>
           </div>
 
+          {/* Navigation */}
           <nav className="mt-6 flex flex-col gap-1 px-4">
             {navItems.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
+                onClick={() => setSidebarOpen(false)}
                 className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   location.pathname === item.to
                     ? "bg-blue-50 text-blue-600"
@@ -50,6 +95,20 @@ export default function SidebarLayout({ children }) {
           </nav>
         </div>
 
+        {/* Feedback Button */}
+<div className="px-6 py-4">
+  <a
+    href="https://forms.gle/ATP9jefWhzdctymW9"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="block w-full text-sm font-medium text-blue-600 border border-blue-200 py-2 rounded-md text-center hover:bg-blue-50 transition"
+  >
+    Masukan / Saran
+  </a>
+</div>
+
+
+        {/* Logout */}
         <div className="px-6 py-4 border-t border-gray-100">
           <button
             onClick={handleLogout}
@@ -61,9 +120,24 @@ export default function SidebarLayout({ children }) {
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 ml-64 overflow-y-auto">
-        <div className="p-6 md:p-8 max-w-6xl mx-auto">{children}</div>
-      </main>
+      <div className="flex-1 flex flex-col md:ml-64 transition-all duration-300">
+        {/* Navbar (mobile) */}
+        <header className="bg-white border-b border-gray-100 flex items-center justify-between px-4 py-3 md:hidden">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="text-gray-600 hover:text-blue-600"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+          <h1 className="text-lg font-semibold text-gray-700">{namaUmkm}</h1>
+          <div className="w-6 h-6"></div>
+        </header>
+
+        {/* Main area */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 md:pl-10 pr-6 space-y-6">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

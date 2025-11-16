@@ -9,6 +9,8 @@ export default function UmkmList() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const navigate = useNavigate();
 
   const fetchUmkms = () => {
@@ -19,10 +21,7 @@ export default function UmkmList() {
         setUmkms(res.data);
         setFilteredUmkms(res.data);
       })
-      .catch((err) => {
-        console.error(err);
-        setError("Gagal memuat data");
-      })
+      .catch(() => setError("Gagal memuat data"))
       .finally(() => setLoading(false));
   };
 
@@ -36,8 +35,7 @@ export default function UmkmList() {
       await api.delete(`/umkms/${id}`);
       alert("UMKM berhasil dihapus");
       fetchUmkms();
-    } catch (err) {
-      console.error(err);
+    } catch {
       alert("Gagal menghapus UMKM");
     }
   };
@@ -48,8 +46,7 @@ export default function UmkmList() {
       await api.post(`/umkms/${id}/approve`);
       alert("✅ UMKM berhasil disetujui");
       fetchUmkms();
-    } catch (err) {
-      console.error(err);
+    } catch {
       alert("Gagal menyetujui UMKM");
     }
   };
@@ -60,8 +57,7 @@ export default function UmkmList() {
       await api.post(`/umkms/${id}/reject`);
       alert("❌ UMKM telah ditolak");
       fetchUmkms();
-    } catch (err) {
-      console.error(err);
+    } catch {
       alert("Gagal menolak UMKM");
     }
   };
@@ -72,13 +68,29 @@ export default function UmkmList() {
       u.nama_umkm.toLowerCase().includes(search.toLowerCase())
     );
     setFilteredUmkms(result);
+    setCurrentPage(1); // reset ke halaman pertama saat cari
   }, [search, umkms]);
+
+  // 📄 Pagination logic
+  const totalPages = Math.ceil(filteredUmkms.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredUmkms.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handlePrev = () => {
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
+  };
 
   return (
     <DashboardLayout>
-      <div className="p-6">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-          <h1 className="text-2xl font-bold text-indigo-700 mb-6">
+      <div className="p-4 md:p-6 w-full">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-3 mb-6">
+          <h1 className="text-xl md:text-2xl font-bold text-indigo-700">
             📋 Daftar UMKM
           </h1>
           <input
@@ -90,6 +102,7 @@ export default function UmkmList() {
           />
         </div>
 
+        {/* Loading / Error */}
         {loading ? (
           <div className="flex justify-center items-center py-12">
             <div className="w-10 h-10 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
@@ -98,87 +111,131 @@ export default function UmkmList() {
         ) : error ? (
           <p className="text-red-500 text-center">{error}</p>
         ) : filteredUmkms.length === 0 ? (
-          <p className="text-gray-500 text-center">Tidak ada data UMKM ditemukan.</p>
+          <p className="text-gray-500 text-center">
+            Tidak ada data UMKM ditemukan.
+          </p>
         ) : (
-          <div className="overflow-x-auto bg-white rounded-2xl shadow-xl border border-gray-100">
-            <table className="min-w-full text-sm text-left border-collapse">
-              <thead className="bg-gradient-to-r from-indigo-600 to-indigo-500 text-white">
-                <tr>
-                  <th className="py-3 px-4 rounded-tl-lg">#</th>
-                  <th className="py-3 px-4">Nama UMKM</th>
-                  <th className="py-3 px-4">Alamat</th>
-                  <th className="py-3 px-4">NIB</th>
-                  <th className="py-3 px-4">PIRT</th>
-                  <th className="py-3 px-4">No HP</th>
-                  <th className="py-3 px-4">Kategori</th>
-                  <th className="py-3 px-4">Approval</th>
-                  <th className="py-3 px-4 rounded-tr-lg text-center">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUmkms.map((u, idx) => (
-                  <tr
-                    key={u.id}
-                    className={`transition-colors ${
-                      idx % 2 === 0 ? "bg-gray-50" : "bg-white"
-                    } hover:bg-indigo-50`}
-                  >
-                    <td className="py-3 px-4 font-medium text-gray-700">
-                      {idx + 1}
-                    </td>
-                    <td className="py-3 px-4 font-semibold text-gray-800">
-                      {u.nama_umkm}
-                    </td>
-                    <td className="py-3 px-4 text-gray-600">{u.alamat}</td>
-                    <td className="py-3 px-4">{u.nib}</td>
-                    <td className="py-3 px-4">{u.pirt}</td>
-                    <td className="py-3 px-4">{u.no_hp}</td>
-                    <td className="py-3 px-4">{u.kategori_umkm || "-"}</td>
-
-                    <td className="py-3 px-4">
-                      {u.is_approved ? (
-                        <span className="inline-flex items-center gap-1 text-green-700 bg-green-100 px-3 py-1 rounded-full text-xs font-medium">
-                          ✅ Disetujui
-                        </span>
-                      ) : (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleApprove(u.id)}
-                            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-xs transition-all"
-                          >
-                            Setujui
-                          </button>
-                          <button
-                            onClick={() => handleReject(u.id)}
-                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs transition-all"
-                          >
-                            Tolak
-                          </button>
-                        </div>
-                      )}
-                    </td>
-
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => navigate(`/umkms/edit/${u.id}`)}
-                          className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs transition-all"
+          <>
+            <div className="overflow-x-auto">
+              <div className="inline-block min-w-full align-middle">
+                <div className="overflow-hidden rounded-2xl shadow-xl border border-gray-100 bg-white">
+                  <table className="min-w-full text-sm text-left">
+                    <thead className="bg-gradient-to-r from-indigo-600 to-indigo-500 text-white">
+                      <tr>
+                        <th className="py-3 px-4 rounded-tl-lg">#</th>
+                        <th className="py-3 px-4">Nama UMKM</th>
+                        <th className="py-3 px-4 hidden md:table-cell">Alamat</th>
+                        <th className="py-3 px-4 hidden lg:table-cell">NIB</th>
+                        <th className="py-3 px-4 hidden md:table-cell">No HP</th>
+                        <th className="py-3 px-4 hidden lg:table-cell">
+                          Kategori
+                        </th>
+                        <th className="py-3 px-4">Approval</th>
+                        <th className="py-3 px-4 text-center rounded-tr-lg">
+                          Aksi
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentItems.map((u, idx) => (
+                        <tr
+                          key={u.id}
+                          className={`transition-colors ${
+                            idx % 2 === 0 ? "bg-gray-50" : "bg-white"
+                          } hover:bg-indigo-50`}
                         >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(u.id)}
-                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs transition-all"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                          <td className="py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
+                            {indexOfFirstItem + idx + 1}
+                          </td>
+                          <td className="py-3 px-4 font-semibold text-gray-800 whitespace-nowrap">
+                            {u.nama_umkm}
+                          </td>
+                          <td className="py-3 px-4 text-gray-600 hidden md:table-cell">
+                            {u.alamat}
+                          </td>
+                          <td className="py-3 px-4 hidden lg:table-cell">{u.nib}</td>
+                          <td className="py-3 px-4 hidden md:table-cell">{u.no_hp}</td>
+                          <td className="py-3 px-4 hidden lg:table-cell">
+                            {u.kategori_umkm || "-"}
+                          </td>
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            {u.is_approved ? (
+                              <span className="inline-flex items-center gap-1 text-green-700 bg-green-100 px-3 py-1 rounded-full text-xs font-medium">
+                                ✅ Disetujui
+                              </span>
+                            ) : (
+                              <div className="flex flex-wrap gap-2">
+                                <button
+                                  onClick={() => handleApprove(u.id)}
+                                  className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-xs"
+                                >
+                                  Setujui
+                                </button>
+                                <button
+                                  onClick={() => handleReject(u.id)}
+                                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs"
+                                >
+                                  Tolak
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-center whitespace-nowrap">
+                            <div className="flex justify-center gap-2 flex-wrap">
+                              <button
+                                onClick={() => navigate(`/umkms/edit/${u.id}`)}
+                                className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDelete(u.id)}
+                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs"
+                              >
+                                Hapus
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            {/* 🔹 Pagination Controls (gaya sama seperti TransactionList.jsx, selalu tampil) */}
+<div className="flex justify-center items-center gap-3 mt-6">
+  <button
+    onClick={handlePrev}
+    disabled={currentPage === 1}
+    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
+      currentPage === 1
+        ? "text-gray-400 border-gray-200 cursor-not-allowed"
+        : "text-indigo-600 border-indigo-300 hover:bg-indigo-50"
+    }`}
+  >
+    Sebelumnya
+  </button>
+
+  <span className="text-gray-700 font-medium">
+    Halaman {currentPage} dari {totalPages || 1}
+  </span>
+
+  <button
+    onClick={handleNext}
+    disabled={currentPage === totalPages || totalPages === 0}
+    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
+      currentPage === totalPages || totalPages === 0
+        ? "text-gray-400 border-gray-200 cursor-not-allowed"
+        : "text-indigo-600 border-indigo-300 hover:bg-indigo-50"
+    }`}
+  >
+    Berikutnya
+  </button>
+</div>
+
+          </>
         )}
       </div>
     </DashboardLayout>

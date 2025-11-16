@@ -53,7 +53,9 @@ export default function Reports() {
   };
 
   const formatRupiah = (value) =>
-    value ? `Rp ${parseInt(value).toLocaleString("id-ID")}` : "-";
+    value || value === 0
+      ? `Rp ${Number(value).toLocaleString("id-ID")}`
+      : "-";
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -61,8 +63,11 @@ export default function Reports() {
         <h2 className="text-2xl font-semibold mb-6 text-gray-800">
           Laporan Keuangan UMKM
         </h2>
+
         {message && (
-          <p className="text-red-600 bg-red-100 p-3 rounded-lg mb-4">{message}</p>
+          <p className="text-red-600 bg-red-100 p-3 rounded-lg mb-4">
+            {message}
+          </p>
         )}
 
         {/* Tabs */}
@@ -89,7 +94,7 @@ export default function Reports() {
 
         {/* Content */}
         <div className="mt-4 text-gray-700">
-          {/* Income Statement */}
+          {/* Laba Rugi */}
           {activeTab === "income" && (
             <div>
               <h3 className="font-semibold text-lg mb-3">
@@ -102,38 +107,10 @@ export default function Reports() {
                   Laba Bersih: {formatRupiah(incomeData.net_income)}
                 </p>
               </div>
-
-              {incomeData.details && incomeData.details.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="font-semibold mb-2">Rincian Transaksi:</h4>
-                  <table className="w-full border-collapse text-sm">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border p-2 text-left">Tanggal</th>
-                        <th className="border p-2 text-left">Akun</th>
-                        <th className="border p-2 text-left">Jenis</th>
-                        <th className="border p-2 text-left">Nominal</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {incomeData.details.map((item, i) => (
-                        <tr key={i} className="hover:bg-gray-50">
-                          <td className="border p-2">{item.tanggal}</td>
-                          <td className="border p-2">{item.akun}</td>
-                          <td className="border p-2 capitalize">{item.jenis}</td>
-                          <td className="border p-2">
-                            {formatRupiah(item.nominal)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
             </div>
           )}
 
-          {/* Retained Earnings */}
+          {/* Laba Ditahan */}
           {activeTab === "retained" && (
             <div>
               <h3 className="font-semibold text-lg mb-3">
@@ -149,7 +126,7 @@ export default function Reports() {
             </div>
           )}
 
-          {/* Balance Sheet */}
+          {/* Neraca */}
           {activeTab === "balance" && (
             <div>
               <h3 className="font-semibold text-lg mb-3">Laporan Neraca</h3>
@@ -158,7 +135,7 @@ export default function Reports() {
                   <h4 className="font-semibold mb-2">Aset</h4>
                   {balanceData.assets?.map((a, i) => (
                     <p key={i}>
-                      {a.nama}: {formatRupiah(a.nilai)}
+                      {a.name}: {formatRupiah(a.balance)}
                     </p>
                   ))}
                   <p className="font-semibold mt-2">
@@ -169,18 +146,19 @@ export default function Reports() {
                   <h4 className="font-semibold mb-2">Kewajiban</h4>
                   {balanceData.liabilities?.map((l, i) => (
                     <p key={i}>
-                      {l.nama}: {formatRupiah(l.nilai)}
+                      {l.name}: {formatRupiah(l.balance)}
                     </p>
                   ))}
                   <p className="font-semibold mt-2">
-                    Total Kewajiban: {formatRupiah(balanceData.total_liabilities)}
+                    Total Kewajiban:{" "}
+                    {formatRupiah(balanceData.total_liabilities)}
                   </p>
                 </div>
                 <div>
                   <h4 className="font-semibold mb-2">Ekuitas</h4>
                   {balanceData.equities?.map((e, i) => (
                     <p key={i}>
-                      {e.nama}: {formatRupiah(e.nilai)}
+                      {e.name}: {formatRupiah(e.balance)}
                     </p>
                   ))}
                   <p className="font-semibold mt-2">
@@ -197,44 +175,65 @@ export default function Reports() {
             </div>
           )}
 
-          {/* Cash Flow */}
+          {/* Arus Kas */}
           {activeTab === "cashflow" && (
             <div>
               <h3 className="font-semibold text-lg mb-3">
                 Laporan Arus Kas (Cash Flow)
               </h3>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <p>Operasional: {formatRupiah(cashFlowData.operating)}</p>
-                <p>Investasi: {formatRupiah(cashFlowData.investing)}</p>
-                <p>Pendanaan: {formatRupiah(cashFlowData.financing)}</p>
-                <p className="font-semibold mt-2">
-                  Perubahan Kas: {formatRupiah(cashFlowData.net_change_in_cash)}
+
+              <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+                <p>
+                  💼 <strong>Kas Awal:</strong>{" "}
+                  {formatRupiah(cashFlowData.cash_start)}
+                </p>
+                <p>
+                  🔹 <strong>Arus Kas dari Aktivitas Operasi:</strong>{" "}
+                  {formatRupiah(cashFlowData.operating)}
+                </p>
+                <p>
+                  🏗️ <strong>Arus Kas dari Aktivitas Investasi:</strong>{" "}
+                  {formatRupiah(cashFlowData.investing)}
+                </p>
+                <p>
+                  💳 <strong>Arus Kas dari Aktivitas Pendanaan:</strong>{" "}
+                  {formatRupiah(cashFlowData.financing)}
+                </p>
+                <p className="font-semibold border-t pt-2 mt-2">
+                  🔻 Kenaikan (Penurunan) Kas Bersih:{" "}
+                  {formatRupiah(cashFlowData.net_change_in_cash)}
+                </p>
+                <p>
+                  💰 <strong>Kas Akhir:</strong>{" "}
+                  {formatRupiah(cashFlowData.cash_end)}
                 </p>
               </div>
 
-              {cashFlowData.details && cashFlowData.details.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="font-semibold mb-2">Rincian Transaksi Kas:</h4>
+              {cashFlowData.details && (
+                <div className="mt-6">
+                  <h4 className="font-semibold mb-2">Rincian Perhitungan:</h4>
                   <table className="w-full border-collapse text-sm">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border p-2 text-left">Tanggal</th>
-                        <th className="border p-2 text-left">Akun</th>
-                        <th className="border p-2 text-left">Jenis</th>
-                        <th className="border p-2 text-left">Nominal</th>
-                      </tr>
-                    </thead>
                     <tbody>
-                      {cashFlowData.details.map((item, i) => (
-                        <tr key={i} className="hover:bg-gray-50">
-                          <td className="border p-2">{item.tanggal}</td>
-                          <td className="border p-2">{item.akun}</td>
-                          <td className="border p-2 capitalize">{item.jenis}</td>
-                          <td className="border p-2">
-                            {formatRupiah(item.nominal)}
-                          </td>
-                        </tr>
-                      ))}
+                      <tr>
+                        <td className="border p-2">Laba Bersih</td>
+                        <td className="border p-2">
+                          {formatRupiah(cashFlowData.details.net_income)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border p-2">Penyesuaian Operasional</td>
+                        <td className="border p-2">
+                          {formatRupiah(
+                            cashFlowData.details.operating_adjustments
+                          )}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border p-2">Depresiasi</td>
+                        <td className="border p-2">
+                          {formatRupiah(cashFlowData.details.depreciation)}
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>

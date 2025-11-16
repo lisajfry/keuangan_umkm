@@ -8,7 +8,6 @@ export default function AddUmkm() {
     nama_umkm: "",
     alamat: "",
     nib: "",
-    pirt: "",
     no_hp: "",
     kategori_umkm: "",
     saldo_kas: "",
@@ -94,16 +93,7 @@ navigate("/umkms"); // kembali ke list UMKM
             />
           </div>
 
-          <div>
-            <label className="block font-medium mb-1">PIRT</label>
-            <input
-              type="text"
-              name="pirt"
-              value={form.pirt}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
-            />
-          </div>
+         
 
           <div>
             <label className="block font-medium mb-1">No. HP</label>

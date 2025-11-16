@@ -1,11 +1,13 @@
-// src/layouts/DashboardLayout.jsx
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Home, Users, FileText, LogOut } from "lucide-react";
+// ===== DashboardLayout.jsx =====
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Home, Users, FileText, LogOut, Menu } from "lucide-react";
 
 export default function DashboardLayout({ children }) {
-  const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [user, setUser] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -31,7 +33,7 @@ export default function DashboardLayout({ children }) {
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-blue-50">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <p className="text-gray-600 text-lg">Memuat Dashboard...</p>
       </div>
     );
@@ -43,62 +45,117 @@ export default function DashboardLayout({ children }) {
     navigate("/");
   };
 
+  const navItems = [
+    { to: "/dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
+    { to: "/umkms", label: "Daftar UMKM", icon: <Users className="w-5 h-5" /> },
+    { to: "/transactions", label: "Transaksi", icon: <FileText className="w-5 h-5" /> },
+    { to: "/laporan", label: "Laporan", icon: <FileText className="w-5 h-5" /> },
+  ];
+
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-100">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white/90 backdrop-blur-md border-r border-blue-100 shadow-md flex flex-col">
-        <div className="px-6 py-6 border-b border-blue-100">
-          <h1 className="text-2xl font-bold text-blue-600">Admin Panel</h1>
-          <p className="text-sm text-gray-500 mt-1">👋 Hai, {user.name}</p>
+    <div className="flex min-h-screen bg-gray-50 overflow-hidden">
+      {/* SIDEBAR OVERLAY (mobile) */}
+      <div
+        className={`fixed inset-0 bg-black/40 z-30 transition-opacity ${
+          sidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        }`}
+        onClick={() => setSidebarOpen(false)}
+      ></div>
+
+      {/* SIDEBAR */}
+      <aside
+        className={`fixed z-40 top-0 left-0 h-full w-64 bg-white border-r border-gray-200 flex flex-col justify-between transform transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
+      >
+        <div>
+          {/* Header Sidebar */}
+          <div className="px-6 py-8 border-b border-gray-100 flex flex-col items-center space-y-4">
+            <div className="flex items-center justify-center space-x-5">
+              <div className="w-20 h-20 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/logo1.png"
+                  alt="Logo kiri"
+                  className="w-full h-full object-contain scale-125"
+                />
+              </div>
+
+              <div className="w-20 h-20 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/logo2.png"
+                  alt="Logo kanan"
+                  className="w-full h-full object-contain scale-125"
+                />
+              </div>
+            </div>
+
+            <h1 className="text-xl font-bold text-gray-800 tracking-tight text-center">
+              Hai, <span className="text-blue-600">Admin Dinas</span>
+            </h1>
+          </div>
+
+          {/* Navigasi */}
+          <nav className="mt-6 flex flex-col gap-1 px-4">
+            {navItems.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  location.pathname === item.to
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                }`}
+              >
+                {item.icon} {item.label}
+              </Link>
+            ))}
+          </nav>
         </div>
 
-        <nav className="flex-1 p-4 space-y-3">
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-3 w-full px-4 py-2 text-gray-700 hover:bg-blue-100 rounded-lg transition-all"
-          >
-            <Home className="w-5 h-5 text-blue-600" /> Dashboard
-          </button>
-
-          <button
-            onClick={() => navigate("/umkms")}
-            className="flex items-center gap-3 w-full px-4 py-2 text-gray-700 hover:bg-blue-100 rounded-lg transition-all"
-          >
-            <Users className="w-5 h-5 text-blue-600" /> Daftar UMKM
-          </button>
-
-          <button
-            onClick={() => navigate("/transactions")}
-            className="flex items-center gap-3 w-full px-4 py-2 text-gray-700 hover:bg-blue-100 rounded-lg transition-all"
-          >
-            <FileText className="w-5 h-5 text-blue-600" /> Transaksi
-          </button>
+        {/* Masukan / Saran UMKM */}
+<div className="px-6 py-4">
+  <a
+    href="https://docs.google.com/forms/d/1_KMXUAuaj5_D819QrulVxoyZqI2zzCMgtRXmn5higC8/edit#question=1691572368&field=1274762544"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="block w-full text-sm font-medium text-blue-600 border border-blue-200 py-2 rounded-md text-center hover:bg-blue-50 transition"
+  >
+    Lihat Masukan / Saran
+  </a>
+</div>
 
 
-
-          <button
-            onClick={() => navigate("/laporan")}
-            className="flex items-center gap-3 w-full px-4 py-2 text-gray-700 hover:bg-blue-100 rounded-lg transition-all"
-          >
-            <FileText className="w-5 h-5 text-blue-600" /> Laporan
-          </button>
-          
-        </nav>
-
-        <div className="p-4 border-t border-blue-100">
+        {/* Logout */}
+        <div className="px-6 py-4 border-t border-gray-100">
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center gap-2 w-full py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-all"
+            className="w-full text-sm font-medium px-4 py-2 rounded-md bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition"
           >
-            <LogOut className="w-5 h-5" /> Logout
+            <LogOut className="inline w-4 h-4 mr-1" /> Logout
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 p-8 overflow-y-auto">
-        {children}
-      </main>
+      {/* MAIN CONTENT */}
+      <div className="flex-1 flex flex-col md:ml-64 transition-all duration-300">
+        {/* Navbar (mobile) */}
+        <header className="bg-white border-b border-gray-100 flex items-center justify-between px-4 py-3 md:hidden">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="text-gray-600 hover:text-blue-600"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+          <h1 className="text-lg font-semibold text-gray-700">Admin Dinas</h1>
+          <div className="w-6 h-6"></div>
+        </header>
+
+        {/* Main area */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 md:pl-10 pr-6 space-y-6">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

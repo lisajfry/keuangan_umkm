@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import umkmApi from "../api/umkmApi";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+
 
 export default function RegisterUmkmPage() {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+const [showConfirm, setShowConfirm] = useState(false);
+
   const [form, setForm] = useState({
     nama_umkm: "",
     alamat: "",
@@ -52,11 +57,12 @@ export default function RegisterUmkmPage() {
           </p>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
           <input
             type="text"
             name="nama_umkm"
             placeholder="Nama UMKM"
+            autoComplete="off"
             className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
             onChange={handleChange}
             required
@@ -65,6 +71,7 @@ export default function RegisterUmkmPage() {
           <textarea
             name="alamat"
             placeholder="Alamat"
+            autoComplete="off"
             className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
             onChange={handleChange}
           />
@@ -73,52 +80,75 @@ export default function RegisterUmkmPage() {
             type="text"
             name="nib"
             placeholder="Nomor Induk Berusaha (NIB)"
+            autoComplete="off"
             className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
             onChange={handleChange}
             required
           />
 
-          <input
-            type="text"
-            name="pirt"
-            placeholder="Nomor PIRT (Opsional)"
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-            onChange={handleChange}
-          />
 
           <input
             type="text"
             name="no_hp"
             placeholder="Nomor HP"
+            autoComplete="off"
             className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
             onChange={handleChange}
           />
 
-          <input
-            type="text"
-            name="kategori_umkm"
-            placeholder="Kategori UMKM (misal: Kuliner, Pakaian, Kerajinan)"
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-            onChange={handleChange}
-          />
+          {/* Kategori UMKM */}
+<input
+  type="text"
+  name="kategori_umkm"
+  placeholder="Kategori UMKM (misal: Kuliner, Pakaian, Kerajinan)"
+  autoComplete="new-category"
+  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
+  onChange={handleChange}
+/>
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-            onChange={handleChange}
-            required
-          />
+{/* Password */}
+<div className="relative">
+  <input
+    type={showPassword ? "text" : "password"}
+    name="password"
+    autoComplete="new-password"
+    placeholder="Password"
+    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 transition pr-10"
+    onChange={handleChange}
+    required
+  />
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute right-3 top-3 text-blue-500"
+  >
+    {showPassword ? <FaEyeSlash /> : <FaEye />}
+  </button>
+</div>
 
-          <input
-            type="password"
-            name="password_confirmation"
-            placeholder="Konfirmasi Password"
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-            onChange={handleChange}
-            required
-          />
+{/* Konfirmasi Password */}
+<div className="relative">
+  <input
+    type={showConfirm ? "text" : "password"}
+    name="password_confirmation"
+    autoComplete="new-password"
+    placeholder="Konfirmasi Password"
+    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 transition pr-10"
+    onChange={handleChange}
+    required
+  />
+  <button
+    type="button"
+    onClick={() => setShowConfirm(!showConfirm)}
+    className="absolute right-3 top-3 text-blue-500"
+  >
+    {showConfirm ? <FaEyeSlash /> : <FaEye />}
+  </button>
+</div>
+
+
+
+         
 
           <button
             type="submit"

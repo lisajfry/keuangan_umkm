@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+
+/* Hilangkan ikon default show/hide password di Chrome/Edge */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none !important;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-caps-lock-indicator,
+input[type="password"]::-webkit-password-toggle {
+  display: none !important;
+  appearance: none !important;
+}

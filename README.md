@@ -1,5 +1,21 @@
 ﻿# keuangan_umkm
 
+# Requirement
+
+Node.js versi 10.8.2
+NPM versi 10.8.2
+
+# Dependencies
+
+react             ^19.1.1  
+react-dom         ^19.1.1  
+react-router-dom  ^7.9.3   
+axios             ^1.12.2  
+lucide-react      ^0.544.0 
+react-icons       ^5.5.0   
+recharts          ^3.2.1   
+
+
 # 1. Clone Repository
 
 ```bash
@@ -14,6 +30,7 @@ cd frontend_admin
 ```
 
 ## 2.1 Install dependensi
+menginstall semua package otomatis
 ```bash
 npm install
 ```
@@ -38,3 +55,4 @@ npm install
 ```bash
 npm run dev
 ```
+
